@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export de fault function Submit() {
+export default function Submit() {
   const [screenshot, setScreenshot] = useState(null);
   const [reason, setReason] = useState('');
   const [uploading, setUploading] = useState(false);
