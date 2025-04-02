@@ -8,11 +8,18 @@ export default function Submit() {
 
   const reasons = [
     { value: '', label: 'Select reason' },
-    { value: 'historical', label: 'Historical record' },
-    { value: 'accountability', label: 'Public accountability' },
-    { value: 'culture', label: 'Cultural significance' },
-    { value: 'satire', label: 'Satire or commentary' }
-  ];
+  { value: 'historical', label: 'Historical record' },
+  { value: 'accountability', label: 'Public accountability' },
+  { value: 'culture', label: 'Cultural significance' },
+  { value: 'satire', label: 'Satire or commentary' },
+  { value: 'journalism', label: 'Example of journalism or reporting' },
+  { value: 'misinformation', label: 'Highlights misinformation or bias' },
+  { value: 'celebrity', label: 'Public figure behavior' },
+  { value: 'activism', label: 'Activism or protest documentation' },
+  { value: 'community', label: 'Represents community sentiment' },
+  { value: 'deleted', label: 'Deleted or removed content' }
+];
+
 
   const handleFileChange = (e) => {
     setScreenshot(e.target.files[0]);
