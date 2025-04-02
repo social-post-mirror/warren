@@ -1,4 +1,3 @@
-// pages/submit.js
 import { useState } from 'react';
 
 export default function Submit() {
@@ -17,7 +16,7 @@ export default function Submit() {
     { value: 'celebrity', label: 'Public figure behavior' },
     { value: 'activism', label: 'Activism or protest documentation' },
     { value: 'community', label: 'Represents community sentiment' },
-    { value: 'deleted', label: 'Deleted or removed content' }
+    { value: 'deleted', label: 'Deleted or removed content' },
   ];
 
   const handleFileChange = (e) => {
@@ -43,7 +42,7 @@ export default function Submit() {
       const res = await fetch('/api/upload-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename, type }),
+        body: JSON.stringify({ filename, type })
       });
 
       const { url } = await res.json();
@@ -51,45 +50,41 @@ export default function Submit() {
       // Step 2: Upload the file directly to S3
       await fetch(url, {
         method: 'PUT',
-        headers: {
-          'Content-Type': type,
-        },
-        body: file,
+        headers: { 'Content-Type': type },
+        body: file
       });
 
-      alert('Screenshot submitted successfully!');
-      setScreenshot(null);
-      setReason('');
+      alert('Upload complete!');
     } catch (err) {
       console.error(err);
-      alert('Something went wrong during upload.');
+      alert('Upload failed.');
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <div style={{ padding: '2rem' }}>
+    <form onSubmit={handleSubmit}>
       <h1>Submit a Screenshot</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Screenshot:
-          <input type="file" accept="image/*" onChange={handleFileChange} required />
-        </label>
-        <br /><br />
-        <label>
-          Why this matters:
-          <select value={reason} onChange={(e) => setReason(e.target.value)} required>
-            {reasons.map((r) => (
-              <option key={r.value} value={r.value}>{r.label}</option>
-            ))}
-          </select>
-        </label>
-        <br /><br />
-        <button type="submit" disabled={uploading}>
-          {uploading ? 'Submitting...' : 'Submit to the Mirror'}
-        </button>
-      </form>
-    </div>
+      <label>
+        Screenshot:
+        <input type="file" accept="image/*" onChange={handleFileChange} required />
+      </label>
+      <br /><br />
+      <label>
+        Why this matters:
+        <select value={reason} onChange={(e) => setReason(e.target.value)} required>
+          {reasons.map((r) => (
+            <option key={r.value} value={r.value}>
+              {r.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <br /><br />
+      <button type="submit" disabled={uploading}>
+        {uploading ? 'Uploading...' : 'Submit to the Mirror'}
+      </button>
+    </form>
   );
 }
