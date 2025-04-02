@@ -1,27 +1,14 @@
-// pages/submit.js
 import { useState } from 'react';
 
 export default function Submit() {
   const [screenshot, setScreenshot] = useState(null);
   const [reason, setReason] = useState('');
   const [uploading, setUploading] = useState(false);
-
-  const reasons = [
-    { value: '', label: 'Select reason' },
-    { value: 'historical', label: 'Historical record' },
-    { value: 'accountability', label: 'Public accountability' },
-    { value: 'culture', label: 'Cultural significance' },
-    { value: 'satire', label: 'Satire or commentary' },
-    { value: 'journalism', label: 'Example of journalism or reporting' },
-    { value: 'misinformation', label: 'Highlights misinformation or bias' },
-    { value: 'celebrity', label: 'Public figure behavior' },
-    { value: 'activism', label: 'Activism or protest documentation' },
-    { value: 'community', label: 'Represents community sentiment' },
-    { value: 'deleted', label: 'Deleted or removed content' },
-  ];
+  const [submitted, setSubmitted] = useState(false);
 
   const handleFileChange = (e) => {
-    setScreenshot(e.target.files[0]);
+    const file = e.target.files[0];
+    setScreenshot(file);
   };
 
   const handleSubmit = async (e) => {
@@ -39,7 +26,7 @@ export default function Submit() {
       const filename = file.name;
       const type = file.type;
 
-      // Step 1: Get a signed upload URL from your backend
+      // Step 1: Get signed URL
       const res = await fetch('/api/upload-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -48,47 +35,61 @@ export default function Submit() {
 
       const { url } = await res.json();
 
-      // Step 2: Upload the file directly to S3
+      // Step 2: Upload file directly to S3
       await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': type },
         body: file,
       });
 
-      alert('Upload successful!');
+      // Step 3: (Optional) Log or submit metadata to your backend
+      console.log('Upload complete');
+
+      setSubmitted(true);
+      setScreenshot(null);
+      setReason('');
     } catch (err) {
-      console.error(err);
-      alert('Upload failed.');
+      console.error('Upload failed:', err);
+      alert('Something went wrong. Please try again.');
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div style={{ padding: '2rem' }}>
       <h1>Submit a Screenshot</h1>
 
-      <label>
-        Screenshot:
-        <input type="file" accept="image/*" onChange={handleFileChange} required />
-      </label>
-      <br /><br />
+      {submitted ? (
+        <p>✅ Thank you! Your screenshot has been submitted.</p>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <label>
+            Screenshot:
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              required
+            />
+          </label>
+          <br /><br />
 
-      <label>
-        Why this matters:
-        <select value={reason} onChange={(e) => setReason(e.target.value)} required>
-          {reasons.map((r) => (
-            <option key={r.value} value={r.value}>
-              {r.label}
-            </option>
-          ))}
-        </select>
-      </label>
-      <br /><br />
+          <label>
+            Why this matters:
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              required
+            />
+          </label>
+          <br /><br />
 
-      <button type="submit" disabled={uploading}>
-        {uploading ? 'Uploading...' : 'Submit to the Mirror'}
-      </button>
-    </form>
+          <button type="submit" disabled={uploading}>
+            {uploading ? 'Uploading...' : 'Submit'}
+          </button>
+        </form>
+      )}
+    </div>
   );
 }
