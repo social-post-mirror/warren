@@ -21,18 +21,50 @@ export default function Submit() {
 ];
 
 
-  const handleFileChange = (e) => {
-    setScreenshot(e.target.files[0]);
-  };
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setUploading(true);
+  if (!screenshot || !reason) {
+    alert('Please select a screenshot and reason before submitting.');
+    return;
+  }
 
-    // placeholder logic, we'll hook up S3 next
-    alert('Upload logic goes here.');
+  setUploading(true);
+
+  try {
+    const file = screenshot;
+    const filename = file.name;
+    const type = file.type;
+
+    // Step 1: Get a signed upload URL from your backend
+    const res = await fetch('/api/upload-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename, type })
+    });
+
+    const { url } = await res.json();
+
+    // Step 2: Upload the file directly to S3
+    await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': type },
+      body: file
+    });
+
+    alert('Screenshot submitted successfully!');
+
+    // Reset form
+    setScreenshot(null);
+    setReason('');
+  } catch (err) {
+    console.error('Upload failed:', err);
+    alert('Upload failed. Please try again.');
+  } finally {
     setUploading(false);
-  };
+  }
+};
+
 
   return (
     <div style={{ maxWidth: 600, margin: '2rem auto', padding: '1rem' }}>
